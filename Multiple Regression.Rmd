@@ -1,0 +1,549 @@
+---
+title: "Tutorial"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Introduction and Review
+
+This tutorial focused on multiple regression. A procedure where we extend concepts of correlation and simple linear regression to models with multiple predictor variables (but still only one outcome variable).
+
+We will start with a small example to demonstrate basic calculations first using a single variable (simply regression), then move to an example with multiple predictors (multiple regress), and then work with real data to provide demonstrations of how to run and interpret analyses in R, discuss relevant statistics, issues and considerations, and reporting. 
+
+
+### Small dataset examples (Correlation)
+
+Multiple regression, like simple regression, is very closely related to correlation. As we'll see, many of the approaches we learned for correlation are the basis for multiple regression approaches. 
+
+We'll work with a very small set of data to review a few core calculations. 
+
+```{r echo=F}
+x<-c(1,3,5,7)
+y<-c(2,5,7,6)
+xy<-cbind(x,y)
+knitr::kable(xy)
+devx<-c(-3,-1,1,3)
+devy<-c(-3,0,2,1)
+devs<-cbind(x,y,devx,devy)
+devxy<-c(9,0,2,3)
+all<-cbind(x,y,devx,devy,devxy)
+xy<-as.data.frame(xy)
+```
+
+For these data $\bar{x}$ = 4 and $\bar{y}$ = 5 and $s_x$=2.58 and $s_y$=2.16.  
+
+Recall the formula for the correlation. 
+
+$\large r = \frac{cov_{xy}}{s_xs_y}$
+
+This requires us to first calculate the covariance:
+
+$\large cov_{xy} = \frac{\Sigma(x-\bar{x})(y-\bar{y})}{n-1}$
+
+The first step to this is to calculate $(x-\bar{x})$ and $(y-\bar{y})$ for every score. 
+
+For example, for the 1st set of scores (x = 1 and y = 3), $(x-\bar{x})$ = 1-4 = -3 and  $(y-\bar{y})$ = 2 - 5 = -3. The table below shows each of those values calculated (NOTE:$(x-\bar{x})$ is listed as devx and ($y-\bar{y})$ is listed as devy). 
+
+```{r echo=F}
+knitr::kable(devs)
+```
+
+Next we multiple each person's $(x-\bar{x})$ by their $(y-\bar{y})$. For the first person, that would be -3 x -3 = 9. The table below lists this as devxdevy (what is represented as $(x-\bar{x})(y-\bar{y})$ in the formula. 
+
+```{r echo=F}
+knitr::kable(all)
+```
+
+To get the covariance, we add up the $(x-\bar{x})(y-\bar{y})$ values to get the numerator of the equation, 9 + 0 + 2 + 3 = 14.
+
+$\large cov_{xy} = \large\frac{\Sigma(x-\bar{x})(y-\bar{y})}{n-1}$ = $\large\frac{14}{4-1}=4.67$
+
+Finally, for the correlation, we take the covariance over the two standard deviations (multiplied together).
+
+$\large r = \frac{cov_{xy}}{s_xs_y}$ = $\large\frac{4.67}{2.58*2.16}$=$\large\frac{4.67}{5.58}=.837$
+
+This suggests that as scores in x get larger, scores on y also tend to get larger. We can see that relationship graphically below. 
+
+```{r echo=F}
+plot(x,y)
+```
+
+
+## R Code Correlation and Covariance
+
+I placed the data we just calculated in a file called *xy* with variables called **x** and **y**. The code below runs each analysis. The commands cov and cor correspond to the covariance and correlation. 
+
+```{r echo=T, echo=T}
+cov(xy$x,xy$y)
+cor(xy$x,xy$y)
+```
+## Review of Simple Linear Regression Calculations
+
+One of the formulae we learned for linear regression was the formula for the regression line (which we can use to calculate predicted scores).
+
+$\large y\prime = a+b_yx$ (note $y\prime$ is sometimes represented as $\hat{y}$)
+
+The two pieces of the formula are the y-intercept $a$ and the slope $b_y$.
+
+Recall the formulae for each:
+
+$\large b_y=\frac{cov_{xy}}{s_x^2}$
+
+$\large a = \bar{y}-b_y\bar{x}$
+
+For our small dataset: 
+
+$\large b_y=\large\frac{4.67}{2.58^2}=\large\frac{4.67}{6.656}=0.70$
+
+$\large a = \bar{y}-b_y\bar{x}=5-0.70(4)=2.2$
+
+The regression equation would then be: 
+
+$\large y\prime = 2.2+0.70x$ 
+
+We can derive $y\prime$ for each person's score by plugging in their x value. For example, the first person's value would be
+
+$\large y\prime=2.0+0.70(1)=2.70$
+
+The table below provides $y\prime$ for all the scores. 
+
+```{r echo=F}
+all<-cbind(x,y,devx,devy,devxy)
+y_prime<-c(2.7,4.1,5.5,6.9)
+preds<-cbind(x,y,devx,devy,devxy,y_prime)
+knitr::kable(preds)
+```
+
+## Exercise/Quiz: Basic Calculations
+
+```{r echo=F}
+x<-c(4,6,8,10)
+y<-c(8,4,2,6)
+devx<-c(" -3","","","")
+devy<-c(" 3","","","")
+devxdevy<-c("-9","","","")
+yprime<-c("6.2","","","")
+ex1<-cbind(x,y,devx,devy,devxdevy,yprime)
+knitr::kable(ex1)
+```
+
+For the data above, $\bar{x}$=7 and $\bar{x}$=5, $s_x$=2.58 and $s_y$=2.58. 
+
+$\large cov_{xy} = \frac{\Sigma(x-\bar{x})(y-\bar{y})}{n-1}$  
+$\large b_y=\frac{cov_{xy}}{s_x^2}$  
+$\large a = \bar{y}-b_y\bar{x}$  
+$\large y\prime = a+b_yx$  
+
+```{r quiz1}
+quiz(
+  question("What is the covariance $cov_xy$ for these data?",
+    answer("0.0"),
+    answer("2.67"),
+    answer("-2.67", correct = TRUE),
+    answer("-1.4"),
+    correct = "Correct. For the slope we first take each deviation (each score minus the mean of each variable (devx and devy in the table) then multiple those values together. Finally, we add those values up and divide by n-1 (3)",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Common errors include summing devx and devy first and then multiplying (this will always produce a value of 0.0. Please try again.",
+    allow_retry = T
+  ),
+  question("What is the slope ($b_y$)?",
+    answer("-0.40", correct = TRUE),
+    answer("-1.04"),
+    answer("-0.90"),
+    answer("0.00"),
+    correct = "Correct. To get the slope we divide the covariance by $s_x^2$",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Common errors for this calculation include dividing by n-1 and not squaring $s_x$. Please try again.",
+    allow_retry = T
+  ),
+  question("What is the y-intercept ($a$)?",
+    answer("7.8", correct = TRUE),
+    answer("9"),
+    answer("4"),
+    answer("5"),
+    correct = "Correct. The y-intercept is the value that we would expect for y when x = 0.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Common errors switching $\bar{x}$ and $\bar{y}$ and forgetting the subtracting a negative value is the same as adding. Please try again.",
+    allow_retry = T
+  ),
+  question("Using the regression predict y-prime for the second set of scores. What is the correct value?",
+    answer("5.4", correct = TRUE),
+    answer("6.2"),
+    answer("9.4"),
+    answer("0"),
+    correct = "Correct. When x=4 we predict y (y-prime) to be 5.4.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Common errors switching x and y and forgetting that adding a negative is the same as subtracting. Please try again.",
+    allow_retry = T
+  )   
+)
+```
+
+## Calculations for Multiple Regression
+
+For multiple regression we have multiple predictor variables (I use x values to represent these). The example that follows demonstrates calculations for two variables. In general, it is not practical to do calculations for more than two variables by hand but it is useful to understand where many of the values come from. The notation here is a bit complex. $b_{y1.2}$ refers to the slope for the first predictor (the .2 can be interpreted as "in the presence of the 2nd predictor.)
+
+$\large b_{y1.2}={\frac{r_{y1}-{r_{y2}{r_{12}}}}{1-r_{12}^2}}*\frac{s_y}{s_1}$  
+
+and for the 2nd predictor:
+
+$\large b_{y2.1}={\frac{r_{y2}-{r_{y1}{r_{12}}}}{1-r_{12}^2}}*\frac{s_y}{s_2}$  
+
+
+```{r echo=F}
+x1<-c(1,3,5,7)
+x2<-c(8,4,5,1)
+y<-c(2,5,7,6)
+mr<-as.data.frame(cbind(x1,x2,y))
+```
+
+```{r}
+knitr::kable(mr)
+```
+
+Since we will need the correlations, means, and standard deviations, I've used R to generate those below. 
+
+```{r echo=T}
+round(cor(mr),2)
+round(mean(mr$x1),2)
+round(mean(mr$x2),2)
+round(mean(mr$y),2)
+round(sd(mr$x1),2)
+round(sd(mr$x2),2)
+round(sd(mr$y),2)
+```
+
+For the first predictor (x1)
+
+$b_{y1.2}={\frac{r_{y1}-{r_{y2}{r_{12}}}}{1-r_{12}^2}}*\frac{s_y}{s_1}$ = 
+${\frac{.84-(-.69*-.89)}{1--.89^2}}*\frac{2.16}{2.58}$=
+${\frac{.84-(.614)}{1-.792}}*\frac{2.16}{2.58}$=
+${\frac{.226}{208}}*{0.837}=0.90$  
+
+$b_{y2.1}={\frac{r_{y2}-{r_{y1}{r_{12}}}}{1-r_{12}^2}}*\frac{s_y}{s_2}$ = 0.20  
+
+(You can try out the calculation for $b_{y2.1}$ to see if you get the right answer).
+
+The y-intercept becomes
+
+$a = \bar{y}-b_{y1}\bar{x_1}-b_{y2}\bar{x_2}=5-0.90(4)-0.20(4.5)=0.5$  
+
+The regression equation then becomes 
+
+$y\prime = a+b_{y1}x_1+b_{y2}x_2$
+
+$y\prime = 0.5 + 0.9x_1+0.2x_2$
+
+For the first person's scores ($x_1$=1 and $x_2$=8), their y' value is 
+
+$y\prime = 0.5 + 0.9(1)+0.2(8)$ = 3.0
+
+We won't do an exercise with multiple regression calculations as you likely will never encounter a situations where you perform the calculations. It is, however, useful to return to these formulae 
+
+## Introduction to Multiple Regression with R
+
+First, we'll run through an analysis of the small dataset that we examined with hand calculations. The one line of code below, runs our analysis. The command lm runs both simply and multiple regression. The outcome variable (y in this case) is the first variable listed the tilde (~) means "predicted by." Every variable listed to the right are the predictors (x1 and x2). The last line of the code indicates the name of the datafile. 
+
+```{r}
+summary(lm(y~x1+x2,data=mr))
+```
+
+We'll discuss different statistics and their interpretation as we move forward but for now, just note under "estimate" we see our intercept (0.5), $b_{y1}$=0.90, and $b_{y2}$=0.20. Both of the slopes are positive, meaning that as each rises, we expect y to rise as well. 
+
+## Multiple Regression with Real Data
+
+*denial* is the datafile that includes variables that examine relationships between climate denial and a variety of other beliefs. 
+
+Jylhä, K. M., & Hellmer, K. (in press). Right-wing populism and climate change denial: The roles of exclusionary and anti-egalitarian preferences, conservative ideology, and antiestablishment attitudes. *Analyses of Social Issues and Public Policy*. https://doi.org/10.1111/asap.12203
+
+The datafile includes the variables **CCD** (Climate Change denial), **ANTIESTABL** (Anti Establishment Beliefs), **TRADVALUE** (traditional values), **OPENNESS** (openness to new experiences),and **AGREEABL** (agreeableness). The data also includes the variable **PSEUDOSCI** (pseudoscience beliefs) that we will use in an exercise later.
+
+In the sections that follow we will run the analysis and examine (and in some cases, introduce) several statistics. 
+
+```{r}
+load(file="G:/My Drive/IntroStatsTutorials/data/denial.RData")
+```
+
+
+## Interpreting the relationships (Slope)
+
+Below, I have run a multiple regression predicting climate change denial from anti-establishment beliefs, traditional values, openness, and agreeableness. Note that to add additional predictors, we simply need to add them to a the string following the ~ symbol. 
+
+```{r echo=T}
+summary(lm(CCD~ANTIESTABL+TRADVALUE+OPENNESS+AGREEABL,data=denial))
+```
+
+Starting with the **ANTIESTABL**, we see there is a positive slope (0.067), indicating that greater anti-establishment beliefs relate to increases in climate change denial. Similarly, greater endorsement of traditional values (0.244) also relates to more climate change denial. Openness (-0.078) showed a negative relationship, meaning that more openness relates to less denial. Agreeable shows a very small (-0.002) negative relationship. 
+
+The slopes, often called unstandardized coefficients, are useful for interpreting the direction of relationships. However, these values are not particularly helpful in determining whether some predictors are stronger than others. This is because the unstandardized coefficient is influenced by the scale of measurement. Recall that each slope tells us how much change we expect for a 1 unit change in the predictor. A one unit change means different things depending on how the predictor is measured. For example, a one unit change on a predictor where scores range from 1 to 10, means something different than a one unit change for a predictor that ranges from 1 to 1000. 
+
+For these reasons, we have other ways to express the relationships between predictors and the outcome. We will look at a different measure to address this relationship (standardized coefficients) and statistics to address other questions in the sections that follow. 
+
+## Standardized Regression Coefficients
+
+A standardized regression coefficient (sometimes called a beta) puts all of our estimates on the same scale. The advantage to this is that we can now compare coefficients. For an unstandardized coefficient, one value being larger than another is uninformative as we are comparing apples to oranges. Standardized coefficients remove this barrier by putting everything on the same scale. You might recall having done this earlier by converting values to z-scores. The same general principle is at work here. Standardized coefficients as how much change in that z-score you would expect in the outcome variable for a 1 z-score change in the predictor. 
+
+As a general rule, if the scaling of your measures is somewhat arbitrary (i.e., most psychological measures) then a standardized coefficient is the preferred statistic for presentation. However, there are sometimes cases where scaling does have meaning and standardization would hurt interpretation. A good example of this is the effects of exercise on blood pressure. In this case, knowing how many minutes of weekly exercise were necessary to drop BP by 10 points would be more meaningful than expressing the result in terms of changes in standard deviation. 
+
+You can get standardized coefficients using R's **scale** command inside your regression code. The scale command converts scores on a variable to a z-score which means that any resulting coefficient is now on a standardized scale. Be sure that you wrap all the variable names in **scale**
+
+```{r echo=T}
+summary(lm(scale(PSEUDOSCI)~scale(ANTIESTABL)+scale(TRADVALUE)+scale(OPENNESS)+scale(AGREEABL),data=denial))
+```
+
+One thing that is useful about these values is that they provide results that allow for comparisons between values. Larger values mean bigger effects. Here we see traditional values produces the largest effect. Now compare that to the unstandardized coefficients below. The unstandardized coefficient for agreeableness was practically the same as for traditional values - however, their standardized coefficients are very different. 
+
+
+## $R^2$ Model
+
+The $R^2$ values tells us how well our set of variables explain the outcome variable. There are several terms we need to unpack before we get to the statistic. You can think of a model simply as the predictors you are using to explain the outcome. In our model, we are predicting climate change denial from anti-establishment beliefs, traditional values, openness, and agreeableness. The idea of explanation focuses on the concept of variability. One way to think of this is how well we can explain whether someone is higher or lower in climate change denial based on our predictors. Another way to think about it is how well we can explain why different people have different scores on the denial variable. 
+
+We can quantify explanation using the $R^2$ model statistic. This value tell us how well we can predict whether or not someone is higher or lower on denial. The scale ranges from 0 to 1.0 with zero meaning we can explain nothing and 1.0 meaning we are explaining the outcome perfectly (i.e., every predicted score perfectly matches the actual score).
+
+Calculating the $R^2$ model statistic requires examining a few additional statistics called Sums of Squares values. The next section addresses these calculations.
+
+## Calculation of Sums of Squares
+
+To further explore the $R^2$ statistic, we will first returning to the small dataset example from earlier. We will examine a few new statistics called "sums of squares." Sums of squares statistics are also used in ANOVA (in exactly the same manner). Don't be put off by the name. Sums of squares (SS) are complicated value - that term is simply describing what we do - we take the square of values and then add them up. There are three values to focus on. $SS_{Total}$, $SS_{Regression}$ (sometimes called $SS_{Predicted}$), and $SS_{Residual}$ (sometimes called $SS_{Error}$). 
+
+Sums of Squares values leverage calculation of many key statistics in both regression and ANOVA approaches. 
+
+$SS_{Total} = \Sigma(y-\bar{y})^2$
+
+For this value, we take each y score, subtract the mean, square the result, then add up the values. A good way to think of this is as the total amount of movement in scores. Another way to think about it is how much variability in scores there is to explain or "how much do scores move around?" Don't bother trying to interpret this value. It really has no meaning on its own. A large value can mean a great deal of variability in scores but it could also mean that you have a large number of scores. 
+
+Below is the example from earlier (with just one predictor to keep it simple), now with the $y-\bar{y}^2$ values added in. Recall that we already calculated $y-\bar{y}^2$ earlier as part of the covariance (noted as devx). As a reminder, $\bar{y}$=5.
+
+```{r echo=F}
+x<-c(4,6,8,10)
+y<-c(8,4,2,6)
+devy<-c(-3,-1,1,3)
+devySQ<-c(9,1,1,9)
+devpred<-c(1.8,-1.4,-2.6,2.2)
+devpredSQ<-c(3.24,1.96,6.76,4.84)
+devpred_mean<-c(1.2,0.4,-0.4,-1.2)
+devpred_meanSQ<-c(1.44,0.16,0.16,1.44)
+yprime<-c(6.2,5.4,4.6,3.8)
+tab1<-cbind(x,y,devy,devySQ)
+tab2<-cbind(x,y,yprime,devpred,devpredSQ)
+tab3<-cbind(x,y,yprime,devpred_mean,devpred_meanSQ)
+knitr::kable(tab1)
+```
+
+To get our final value, we simply take the devxSQ (our notation for $(y-\bar{y})^2$) values and add them up. 
+
+$SS_{Total} = \Sigma(y-\bar{y})^2 = 9+1+1+9 = 20$
+
+What does 20 mean? The best answer to that is "nothing." Or, more correctly, nothing outside of the context of our other SS values. 
+
+Turning now to $SS_{Residual}$, this value reflects the difference between our predicted values and the actual scores on y. The formula below is similar to $SS_{Total}$ but it use y' in the place of the mean. I note $(y-{y}\prime)$ as devpred below. 
+
+$SS_{Regression} = \Sigma(y-{y}\prime)^2$
+
+```{r echo=F}
+knitr::kable(tab2)
+```
+Again, taking the sum of the squared values (devpredSQ). 
+
+$SS_{Residual} = \Sigma(y-{y}\prime)^2 = 3.24 + 1.96 + 6.76 + 4.84 = 16.8$
+
+Although this value has no meaning on its own, we can compare it to $SS_{Total}=20$. This tells us that out of the 20 possible "things" we could explain, our model was unable to explain 16.8 of them. That might seem like a big chunk, but keep in mind, in Psychology, explanation is hard because humans are way more complex than rocks and stuff. 
+
+The last value is $SS_{Regression}$. This value takes the predicted score minus the mean score. The reason for this is that we are addressing how much our prediction tell us over what we already know. Since we know the mean for y is five, we could make a reasonably accurate prediction of scores but simply choosing y'=5 for everyone. $SS_{Regression}$ tells us how much better we are improving prediction over that baseline. I note $\bar{y}-{y}\prime$ as devpred_mean below.  
+
+$SS_{Regression} = \Sigma(\bar{y}-{y}\prime)^2$
+
+```{r echo=F}
+knitr::kable(tab3)
+```
+
+$SS_{Regression} = \Sigma(\bar{y}-{y}\prime)^2 = 1.44 + 0.16 + 0.16 + 1.44 = 3.2$
+
+Note that $SS_{Total} = SS_{Regression} + SS_{Residual}$!
+
+20 = 16.8 + 3.2
+
+### Calculating $R^2$
+
+Finally, we can calculate our $R^2$ value! Remember, this is an index of how well our predictors, as a whole explain the outcome. It is often discussed in terms of the proportion of variance explained (i.e., how much can we explain or predict out of total). This is a simple ratio of two of our SS values. 
+
+$R^2=\frac{SS_{Regression}}{SS_{Total}} = \frac{3.2}{20} = .16$
+
+One way to interpret this value is to say 16% of the variability in y is explained by x. One problem with $R^2$ values is that there really is no index for whether these are large or small or whether prediction is good or bad. As always, this is really about the context of the research question. 
+
+## $R^2$ with R (these letters are not related!)
+
+Recall from our example, we obtained an $R^2$ value of .1598 (note, it is just a coincidence that this value is the same as the small calculation example). This tells us that about 16% of the variability in climate change denial scores can be explained by knowing people's anti-establishment beliefs, traditional values, openness, and agreeableness. Whether that value is impressive or not is a context of the research. If others studying climate change beliefs could only explain five percent of the variability with their models, then our result would be impressive. If, however, others routinely explained 30% of the variance, our results would be less impressive. 
+
+```{r}
+load(file="G:/My Drive/IntroStatsTutorials/data/denial.RData")
+summary(lm(CCD~ANTIESTABL+TRADVALUE+OPENNESS+AGREEABL,data=denial))
+```
+
+Warning! A common misinterpretation of $R^2$ values is that they represent the percent of **people**'s scores explained by our model. $R^2$ of .16 does not mean we explained climate change denial for 16% of the people in our sample. We are explicitly focused on the total variability of scores. Some people will be better explained than others. Remember, variability refers to scores on the climate change variable, not to whether we perfectly predicted someone's score. 
+
+## Exercise: Do your own analysis
+
+The exercise below asks to you run and interpret results from a different analysis. In this one, we will predict pseudoscience beliefs (**PSEUDOSCI**) from the same predictors as before. (**ANTIESTABL** (Anti Establishment Beliefs), **TRADVALUE** (traditional values), **OPENNESS** (openness to new experiences),and **AGREEABL** (agreeableness)). 
+
+For reference, the code for the previous example is below. Adapt this code to the new problem.
+```{r EVAL=F, echo=T}
+summary(lm(CCD~ANTIESTABL+TRADVALUE+OPENNESS+AGREEABL,data=denial))
+```
+
+
+```{r ex1, exercise = TRUE, exercise.lines = 1}
+
+```
+
+```{r ex1-solution}
+summary(lm(CCD~ANTIESTABL+TRADVALUE+OPENNESS+AGREEABL,data=denial))
+```
+
+## Quiz: Interpreting Output
+
+```{r}
+summary(lm(PSEUDOSCI~ANTIESTABL+TRADVALUE+OPENNESS+AGREEABL,data=denial))
+```
+
+
+```{r quiz2}
+quiz(
+  question("Which predictor has a regression coefficient of .020987?",
+    answer("Anti Establishment"),
+    answer("Openness"),
+    answer("Traditional Values", correct = TRUE),
+    answer("Agreeableness"),
+    correct = "Correct!",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Please try again.",
+    allow_retry = T
+  ),
+  question("What is the slope/regresison coefficient for Openness?",
+    answer("0.032", correct = TRUE),
+    answer("0.372"),
+    answer("0.169"),
+    answer("0.209"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect.  Please try again.",
+    allow_retry = T
+  ),
+  question("What is the best interpretation of $R^2$",
+    answer("About 10% of the variance in pseuedoscience beliefs is explained by our predictors", correct = TRUE),
+    answer("Our predictors don't explain pseuedoscience beliefs "),
+    answer("About .10% of the variance in pseuedoscience beliefs is explained by our predictors"),
+    answer("$R^2$ was large"),
+    correct = "Correct.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Please try again.",
+    allow_retry = T
+  ),
+  question("What is the best plain English explanation of the influence of anti-establishment beliefs",
+    answer("People with stronger anti-establishment belief scores tended to posses more pseudoscience beliefs", correct = TRUE),
+    answer("People with weaker anti-establishment belief scores tended to posses more pseudoscience beliefs"),
+    answer("Anti-establishment were positively associated with pseudoscience beliefs"),
+    answer("Anti-establishment were negatively associated with pseudoscience beliefs"),
+    correct = "Correct. A good plain English answer always talks about how the variables relate without reliance on statistical language (e.g., positively associated).",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Please try again.",
+    allow_retry = T
+  ),
+  question("Which type of statistics were presented in this example?",
+    answer("Unstandardized Coefficients", correct = TRUE),
+    answer("Standardized Coefficients"),
+    correct = "Correct. This example used unstandardized coefficients.",
+    random_answer_order = TRUE,
+    incorrect = "Sorry, that is incorrect. Please try again.",
+    allow_retry = T
+  )   
+)
+```
+
+
+## Statistical Significance and APA Style Reporting
+
+To this point, we have not discussed statistical significance. That is by design as the structure of some statistics courses involves covering regression approaches before significance testing. If your class uses that format, feel free to skip this section now and circle back after you've covered it. 
+
+In multiple regression there are two types of significance tests provided. The first is a test of $R^2$, involving a F statistic (just like the ones used in ANOVA). This answers the general question of whether the predictors as a set explain the outcome. More formally, this tests addresses whether it is unlikely the the population $R^2$ is zero. Even more formally below, we can express this as a null hypothesis (the population $R^2$ is noted as $\rho^2$. 
+
+$H_0:\rho^2 = 0$
+
+```{r ECHO=F}
+summary(lm(scale(PSEUDOSCI)~scale(ANTIESTABL)+scale(TRADVALUE)+scale(OPENNESS)+scale(AGREEABL),data=denial))
+```
+
+The output above produced an F of 43.47 with a p value of well below .001. Using an $\alpha$ = .05 criterion, we can see that our p is well below, so we reject the null hypothesis. This suggests it would be unlikely to obtain a sample where we explained about 10% of the variance in climate change denial, if our set of predictors actually explained nothing in the population. 
+
+In APA style we would report like this. The set of predictor produced $R^2$ = .10, *F*(4, 1578) = 43.47, *p*<.001. 
+
+Whereas $R^2$ gets at whether the predictors as a set explain climate change denial, this does not mean each predictor explains denial. For questions about individual statistics, we turn to test of the individual coefficients. Each has a t-value and associated probability. For each we test the null hypothesis that each predictor uniquely predicts climate change denial. Formally, we express this as follows with the Greek symbol $\beta$ representing the regression coefficient in the population: 
+
+$H_0: \beta = 0$
+
+For our predictors, all but openness produce p values that allow us to reject the null hypothesis. 
+
+Reporting this in APA style can take many forms. One way to present this is below. One thing to note is that I'm using standardized coefficients, the notation for that is $b^*$ whereas the notation for unstandardized is $b$. You might see papers that use $/beta$, but that is outdated.
+
+The set of predictor produced $R^2$ = .10, *F*(4, 1578) = 43.47, *p*<.001. Participants who expressed greater antiestablishment beliefs, $b^*$ = .17, *p* < .001, more strongly endorsed traditional values, $b^*$ = .22, *p* < .001, and possessed more agreeable personality traits, $b^*$ = .14, *p* < .001, indicated greater climate change denial beliefs. Openness was unrelated to climate change denial, $b^*$ = .02, *p* = .33.
+
+A few pieces to note in APA reporting. First, any statistic that can exceed 1.0 would get a zero in front of the decimal if <1.0. $b^*$ and *p* cannot exceed 1.0, so they have no leading zero. However, $b$ can exceed zero, so the correct reporting would be $b$ = 0.17. Second, always report all effects. Sometimes you will find papers that only report statistically significant results. That is not good practice. Third, always present exact p-values unless the value is below .001. Always present those as *p*<.001. Do not present values as *p*=.000 or *p*<.000. You will see published examples of values presented this way - those are bad examples. *p*=.000 suggests an outcome is impossible and *p*<.000 simply is not possible. 
+
+
+## Effect Size: Squared Semi Partial Correlation
+
+In line with current best practices, it is always important to present an effect size estimate for all predictors. The $R^2$ value is an effect size for the prediction model as a whole. The individual predictors, technically have an effect size estimate in the standardized coefficient, however, there are better measures. 
+
+One useful measure is the squared semi-partial correlation $sr^2$. One way to think of this is as something like an $R^2$ value for the coefficient. Technically, it tell us how much variance our predictor uniquely explains in the outcome. 
+
+To get $sr^2$ we need will need to calculate this value by hand (or force R to do it). There are packages that purport to calculate this value but only do so for situations with two predictors. 
+
+The formula for a squared semipartial correlation is relatively simple. We just need a few values from our output. For our example, $df_residual$ = 1578, $R^2$ = .09926, the t-values refer to the *t* for the effect of interest. 
+
+$sr^2 = \frac{t^2}{df_{residual}}*(1-R^2)$
+
+For traditional values the calculation looks like this: 
+
+$sr^2 = \frac{t^2}{df_{residual}}*(1-R^2) = \frac{8.972^2}{1578}*(1-.09926) = \frac{80.50}{1578}*(.90074) = .046$
+
+```{r ECHO=F}
+summary(lm(scale(PSEUDOSCI)~scale(ANTIESTABL)+scale(TRADVALUE)+scale(OPENNESS)+scale(AGREEABL),data=denial))
+```
+Alternatively, we might get R to do the work for us. The code below calculates everything based on the formula. 
+
+```{r echo=T}
+R2<-.09926
+df<-1578
+t1<-7.073
+t2<-8.972
+t3<-0.976
+t4<-5.474
+sr1<-((t1^2)/df)*(1-R2)
+sr2<-((t2^2)/df)*(1-R2)
+sr3<-((t3^2)/df)*(1-R2)
+sr4<-((t4^2)/df)*(1-R2)
+sr1
+sr2
+sr3
+sr4
+```
+
+Examining these values we can see that the variable that provides the strongest prediction is clearly traditional values, explaining around 4.5% of the variance uniquely. 
+
+
+Below, I've added each of these values to the presentation. 
+
+he set of predictor produced $R^2$ = .10, *F*(4, 157) = 43.47, *p*<.001. Participants who expressed greater antiestablishment beliefs, $b^*$ = .17, $sr^2$ = .023, *p* < .001, more strongly endorsed traditional values, $b^*$ = .22, $sr^2$ = .046, *p* < .001, and possessed more agreeable personality traits, $b^*$ = .14, $sr^2$ = .017, *p* < .001, indicated greater climate change denial beliefs. Openness was unrelated to climate change denial, $b^*$ = .02, $sr^2$ = .001,*p* = .33.
+
+One additional thing to note. If we add the $sr^2$ values .023+.046+.017+.001, it comes to .087. Initially, many students might believe that this value should be equal to $R^2$ for the full model, however it is almost always less than that value. Why is that? It is because this reflects what a variable can *uniquely* explain. Some of the variance explained in any model is variance that can be explained by two or more variables. This is largely a function how strongly correlated the predictors are. Highly correlated predictors will create less uniquely explained variance than weakly correlated ones. 
+
+
+## What We Haven't Covered
+
+Although this tutorial is over, it is important to highlight the many topics that were not covered. Most prominently are assumptions for regression. All statistical tests make assumptions about the underlying data, and regression is no different. Additionally, this tutorial did not address models with categorical variables, interactions, and hierarchical multiple regression. 
